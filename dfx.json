@@ -1,0 +1,27 @@
+{
+  "canisters": {
+    "kanban-app-backend": {
+      "candid": "src/kanban-app-backend/kanban-app-backend.did",
+      "package": "kanban-app-backend",
+      "type": "rust"
+    },
+    "kanban-app-frontend": {
+      "dependencies": [
+        "kanban-app-backend"
+      ],
+      "source": [
+        "src/kanban-app-frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "kanban-app-frontend"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

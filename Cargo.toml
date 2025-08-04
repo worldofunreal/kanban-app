@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/kanban-app-backend"
+]
+resolver = "2"

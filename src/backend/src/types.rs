@@ -11,7 +11,6 @@ pub type Timestamp = u64;
 // Theme preferences
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct ThemePreferences {
-    pub theme: String,      // "default" or "new-york"
     pub color: String,      // color scheme name
     pub dark_mode: bool,    // true for dark, false for light
 }
@@ -20,7 +19,8 @@ pub struct ThemePreferences {
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct UserProfile {
     pub name: String,
-    pub email: String,
+    pub username: String,
+    pub email: Option<String>,
     pub avatar_url: Option<String>,
     pub bio: Option<String>,
     pub theme_preferences: Option<ThemePreferences>,
@@ -113,7 +113,8 @@ pub struct Invite {
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct UserProfileUpdate {
     pub name: Option<String>,
-    pub email: Option<String>,
+    pub username: Option<String>,
+    pub email: Option<Option<String>>,
     pub avatar_url: Option<Option<String>>,
     pub bio: Option<Option<String>>,
     pub theme_preferences: Option<Option<ThemePreferences>>,

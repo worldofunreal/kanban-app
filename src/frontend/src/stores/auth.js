@@ -121,16 +121,36 @@ export const useAuthStore = defineStore('auth', {
         // Use provided profile or generate default one
         const userProfile = profile || {
           name: `User_${principal.slice(0, 8)}`,
-          email: '',
+          username: (() => {
+            const randomDigits = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+            return `Guest${randomDigits}`;
+          })(),
+          email: [],
           bio: [],
           avatar_url: [],
+          theme_preferences: []
         };
 
-        // Import backend canister
-        const { backend } = await import('../../../declarations/backend');
+        // Import backend canister with authenticated identity
+        const { createActor } = await import('../../../declarations/backend');
+        const { HttpAgent } = await import('@dfinity/agent');
+        
+        // Create agent with authenticated identity
+        const agent = new HttpAgent({
+          identity: identity,
+          host: 'http://127.0.0.1:4943'
+        });
+        
+        // Fetch root key for local development
+        await agent.fetchRootKey();
+        
+        // Create actor with authenticated identity
+        const backendActor = createActor(process.env.CANISTER_ID_BACKEND, {
+          agent
+        });
 
-        // Create user profile
-        const result = await backend.create_user(userProfile);
+        // Create user profile with authenticated call
+        const result = await backendActor.create_user(userProfile);
 
         console.log('Backend result:', result);
 
@@ -240,6 +260,7 @@ export const useAuthStore = defineStore('auth', {
         // Format updates for UserProfileUpdate type
         const formattedUpdates = {
           name: updates.name,
+          username: updates.username,
           email: updates.email,
           bio: updates.bio !== undefined ? [updates.bio] : [],
           avatar_url: updates.avatar_url !== undefined ? [updates.avatar_url] : [],
@@ -258,6 +279,38 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         console.error('Failed to update user profile:', error);
+        throw error;
+      }
+    },
+
+    // Update username only
+    async updateUsername(username) {
+      try {
+        if (!identity) {
+          throw new Error('No identity available');
+        }
+
+        const principal = identity.getPrincipal().toText();
+
+        // Import backend canister
+        const { backend } = await import('../../../declarations/backend');
+
+        // Update username
+        const result = await backend.update_username(principal, username);
+
+        if ('Ok' in result) {
+          // Update local user state
+          if (this.user) {
+            this.user.profile.username = username;
+            this.saveStateToLocalStorage();
+          }
+          console.log('Username updated:', username);
+          return true;
+        } else {
+          throw new Error(result.Err || 'Failed to update username');
+        }
+      } catch (error) {
+        console.error('Failed to update username:', error);
         throw error;
       }
     },
@@ -376,9 +429,14 @@ export const useAuthStore = defineStore('auth', {
         // Create user profile with provided data
         const result = await backend.create_user({
           name: profile.name,
-          email: profile.email,
-          bio: profile.bio || [],
-          avatar_url: profile.avatar_url || [],
+          username: profile.username || (() => {
+            const randomDigits = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
+            return `Guest${randomDigits}`;
+          })(),
+          email: profile.email ? [profile.email] : [],
+          bio: profile.bio ? [profile.bio] : [],
+          avatar_url: profile.avatar_url ? [profile.avatar_url] : [],
+          theme_preferences: []
         });
 
         if ('Ok' in result) {

@@ -5,9 +5,20 @@
       $attrs.class
     )"
     v-bind="$attrs"
+    :value="modelValue"
+    @input="$emit('update:modelValue', $event.target.value)"
   />
 </template>
 
 <script setup>
 import { cn } from '@/lib/utils'
+
+defineProps({
+  modelValue: {
+    type: String,
+    default: ''
+  }
+})
+
+defineEmits(['update:modelValue'])
 </script> 

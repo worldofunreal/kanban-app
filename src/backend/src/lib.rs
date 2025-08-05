@@ -25,9 +25,31 @@ thread_local! {
 async fn create_user(profile: UserProfile) -> Result<String, Error> {
     let caller_principal = msg_caller();
     
-    // Check if user already exists
+    // Check if user already exists with better error handling
     if USER_PRINCIPALS.with(|principals| principals.borrow().contains_key(&caller_principal)) {
         return Err(Error::AlreadyExists);
+    }
+    
+    // Validate profile data
+    if profile.name.trim().is_empty() {
+        return Err(Error::InvalidInput("Name cannot be empty".to_string()));
+    }
+    
+    if profile.username.trim().is_empty() {
+        return Err(Error::InvalidInput("Username cannot be empty".to_string()));
+    }
+    
+    if profile.username.len() > 12 {
+        return Err(Error::InvalidInput("Username too long (max 12 characters)".to_string()));
+    }
+    
+    // Check if username is already taken by another user
+    let username_taken = USERS.with(|users| {
+        users.borrow().values().any(|user| user.profile.username == profile.username)
+    });
+    
+    if username_taken {
+        return Err(Error::InvalidInput("Username is already taken".to_string()));
     }
     
     let user_id = utils::generate_id().await;
@@ -56,6 +78,25 @@ fn get_user(user_id: String) -> Option<User> {
     USERS.with(|users| users.borrow().get(&user_id).cloned())
 }
 
+#[ic_cdk::query]
+fn is_user_registered() -> bool {
+    let caller_principal = msg_caller();
+    USER_PRINCIPALS.with(|principals| principals.borrow().contains_key(&caller_principal))
+}
+
+#[ic_cdk::query]
+fn get_user_by_principal(principal: Principal) -> Option<User> {
+    let user_id = USER_PRINCIPALS.with(|principals| principals.borrow().get(&principal).cloned())?;
+    get_user(user_id)
+}
+
+#[ic_cdk::query]
+fn is_username_available(username: String) -> bool {
+    USERS.with(|users| {
+        !users.borrow().values().any(|user| user.profile.username == username)
+    })
+}
+
 #[ic_cdk::update]
 async fn update_profile(user_id: String, profile_update: UserProfileUpdate) -> Result<(), Error> {
     let caller_principal = msg_caller();
@@ -69,6 +110,9 @@ async fn update_profile(user_id: String, profile_update: UserProfileUpdate) -> R
         if let Some(user) = users.borrow_mut().get_mut(&user_id) {
             if let Some(name) = profile_update.name {
                 user.profile.name = name;
+            }
+            if let Some(username) = profile_update.username {
+                user.profile.username = username;
             }
             if let Some(email) = profile_update.email {
                 user.profile.email = email;
@@ -98,6 +142,35 @@ async fn update_theme_preferences(theme_preferences: ThemePreferences) -> Result
     USERS.with(|users| {
         if let Some(user) = users.borrow_mut().get_mut(&user_id) {
             user.profile.theme_preferences = Some(theme_preferences);
+            user.updated_at = time();
+            Ok(())
+        } else {
+            Err(Error::UserNotFound)
+        }
+    })
+}
+
+#[ic_cdk::update]
+async fn update_username(user_id: String, username: String) -> Result<(), Error> {
+    let caller_principal = msg_caller();
+    let current_user_id = get_current_user_id(&caller_principal)?;
+    
+    if current_user_id != user_id {
+        return Err(Error::Unauthorized);
+    }
+    
+    // Basic username validation
+    if username.trim().is_empty() {
+        return Err(Error::InvalidInput("Username cannot be empty".to_string()));
+    }
+    
+    if username.len() > 12 {
+        return Err(Error::InvalidInput("Username too long (max 12 characters)".to_string()));
+    }
+    
+    USERS.with(|users| {
+        if let Some(user) = users.borrow_mut().get_mut(&user_id) {
+            user.profile.username = username;
             user.updated_at = time();
             Ok(())
         } else {

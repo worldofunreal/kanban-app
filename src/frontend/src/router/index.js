@@ -3,8 +3,7 @@ import { useAuthStore } from '../stores/auth';
 
 // Import views
 import Dashboard from '../views/Dashboard.vue';
-import Login from '../views/Login.vue';
-import Register from '../views/Register.vue';
+import LoginForm from '../components/user/LoginForm.vue';
 import Teams from '../views/Teams.vue';
 import TeamDetail from '../views/TeamDetail.vue';
 import Projects from '../views/Projects.vue';
@@ -23,13 +22,7 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login,
-    meta: { requiresGuest: true },
-  },
-  {
-    path: '/register',
-    name: 'Register',
-    component: Register,
+    component: LoginForm,
     meta: { requiresGuest: true },
   },
   {

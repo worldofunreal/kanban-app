@@ -41,7 +41,7 @@
         </Button>
       </div>
 
-      <CardHeader class="text-center">
+      <CardHeader class="text-center" v-if="currentStep === 1">
         <CardTitle class="text-2xl font-bold">Kanban App</CardTitle>
         <CardDescription>Collaborative Project Management</CardDescription>
       </CardHeader>
@@ -96,103 +96,34 @@
 
         <!-- Step 2: Profile Setup -->
         <div v-if="currentStep === 2" class="space-y-6">
-          <!-- Progress Indicator -->
-          <div class="space-y-2">
-            <div class="flex justify-between text-sm text-muted-foreground">
-              <span>Step 2 of 3</span>
-              <span>Profile Setup</span>
-            </div>
-            <div class="w-full bg-muted rounded-full h-2">
-              <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 66%"></div>
-            </div>
-          </div>
-
-          <div class="text-center">
-            <h2 class="text-xl font-semibold">Tell us about yourself</h2>
+          <div class="text-center mt-4">
+            <h2 class="text-xl font-semibold">Customize your profile</h2>
             <p class="text-sm text-muted-foreground mt-2">
-              This helps personalize your experience
+              This is how other users will see you in the workspace
             </p>
           </div>
           
           <div class="space-y-4">
-            <!-- Name Field -->
+            <!-- Username Field -->
             <div>
-              <Label for="name" class="flex items-center gap-2">
-                Full Name
-                <span class="text-destructive">*</span>
-                <div v-if="nameValidation.isValid && profile.name" class="flex-shrink-0">
+              <Label for="username" class="flex mb-2 items-center gap-2">
+                Username
+                <div v-if="usernameValidation.isValid && profile.username" class="flex-shrink-0">
                   <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                   </svg>
                 </div>
               </Label>
               <Input
-                id="name"
-                v-model="profile.name"
-                placeholder="Enter your full name"
+                id="username"
+                v-model="profile.username"
+                placeholder="Enter your username"
                 class="mt-1"
-                :class="nameValidation.isValid && profile.name ? 'border-green-500' : nameValidation.error ? 'border-destructive' : ''"
-                @input="validateName"
+                :class="usernameValidation.isValid && profile.username ? 'border-green-500' : usernameValidation.error ? 'border-destructive' : ''"
+                @input="validateUsername"
+                @blur="validateUsername"
               />
-              <p v-if="nameValidation.error" class="text-sm text-destructive mt-1">{{ nameValidation.error }}</p>
-            </div>
-            
-            <!-- Email Field -->
-            <div>
-              <Label for="email" class="flex items-center gap-2">
-                Email Address
-                <span class="text-destructive">*</span>
-                <div v-if="emailValidation.isValid && profile.email" class="flex-shrink-0">
-                  <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
-                  </svg>
-                </div>
-              </Label>
-              <Input
-                id="email"
-                v-model="profile.email"
-                type="email"
-                placeholder="Enter your email"
-                class="mt-1"
-                :class="emailValidation.isValid && profile.email ? 'border-green-500' : emailValidation.error ? 'border-destructive' : ''"
-                @input="validateEmail"
-              />
-              <p v-if="emailValidation.error" class="text-sm text-destructive mt-1">{{ emailValidation.error }}</p>
-            </div>
-            
-            <!-- Bio Field (Collapsible) -->
-            <div>
-              <Button
-                variant="ghost"
-                class="p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
-                @click="showBio = !showBio"
-              >
-                <div class="flex items-center gap-2">
-                  <svg 
-                    class="w-4 h-4 transition-transform" 
-                    :class="showBio ? 'rotate-90' : ''"
-                    fill="currentColor" 
-                    viewBox="0 0 20 20"
-                  >
-                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
-                  </svg>
-                  Add bio (optional)
-                </div>
-              </Button>
-              
-              <div v-if="showBio" class="mt-3 space-y-2">
-                <Label for="bio">Bio</Label>
-                <Textarea
-                  id="bio"
-                  v-model="profile.bio"
-                  placeholder="Tell us about yourself"
-                  rows="3"
-                  maxlength="200"
-                />
-                <p class="text-xs text-muted-foreground text-right">
-                  {{ profile.bio.length }}/200 characters
-                </p>
-              </div>
+              <p v-if="usernameValidation.error" class="text-sm text-destructive mt-1">{{ usernameValidation.error }}</p>
             </div>
           </div>
           
@@ -222,34 +153,17 @@
                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
               </svg>
             </div>
-            <h2 class="text-xl font-semibold">Account Created!</h2>
+            <h2 class="text-xl font-semibold">Welcome to Kanban!</h2>
             <p class="text-sm text-muted-foreground mt-2">
-              Your account has been successfully created
+              Your account is ready. Let's get you started with your first project.
             </p>
-          </div>
-          
-          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-              <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-              </svg>
-              <div>
-                <h4 class="font-medium text-amber-800">Save Your Recovery Phrase</h4>
-                <p class="text-sm text-amber-700 mt-1">
-                  Write down this 12-word phrase to recover your account later:
-                </p>
-                <div class="mt-3 p-3 bg-white border border-amber-300 rounded font-mono text-sm">
-                  {{ seedPhrase }}
-                </div>
-              </div>
-            </div>
           </div>
           
           <Button 
             class="w-full"
             @click="goToDashboard"
           >
-            Continue to Dashboard
+            Get Started
           </Button>
         </div>
       </CardContent>
@@ -300,7 +214,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, watch } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useThemeStore } from '@/stores/theme';
 import { useRouter } from 'vue-router';
@@ -325,24 +239,18 @@ const signInSeedPhrase = ref('');
 const signInLoading = ref(false);
 const signInError = ref('');
 const seedPhrase = ref('');
-const showBio = ref(false);
 
 const profile = reactive({
-  name: '',
-  email: '',
-  bio: ''
+  username: ''
 });
 
 // Validation states
-const nameValidation = reactive({
+const usernameValidation = reactive({
   isValid: false,
   error: ''
 });
 
-const emailValidation = reactive({
-  isValid: false,
-  error: ''
-});
+
 
 
 
@@ -355,7 +263,8 @@ const isDark = computed(() => {
 });
 
 const isStep2Valid = computed(() => {
-  return nameValidation.isValid && emailValidation.isValid && profile.name && profile.email;
+  // Username is optional, so step is always valid
+  return true;
 });
 
 // Color cycling
@@ -369,50 +278,40 @@ const cycleColor = () => {
 };
 
 // Validation functions
-const validateName = () => {
-  const name = profile.name.trim();
-  if (!name) {
-    nameValidation.isValid = false;
-    nameValidation.error = '';
+const validateUsername = () => {
+  const username = profile.username;
+  if (!username || !username.trim()) {
+    usernameValidation.isValid = false;
+    usernameValidation.error = '';
     return;
   }
   
-  if (name.length < 2) {
-    nameValidation.isValid = false;
-    nameValidation.error = 'Name must be at least 2 characters long';
+  const trimmedUsername = username.trim();
+  
+  if (trimmedUsername.length < 2) {
+    usernameValidation.isValid = false;
+    usernameValidation.error = 'Username must be at least 2 characters long';
     return;
   }
   
-  if (!/^[a-zA-Z\s]+$/.test(name)) {
-    nameValidation.isValid = false;
-    nameValidation.error = 'Name can only contain letters and spaces';
+  if (trimmedUsername.length > 12) {
+    usernameValidation.isValid = false;
+    usernameValidation.error = 'Username must be less than 12 characters';
     return;
   }
   
-  nameValidation.isValid = true;
-  nameValidation.error = '';
-};
-
-const validateEmail = () => {
-  const email = profile.email.trim();
-  if (!email) {
-    emailValidation.isValid = false;
-    emailValidation.error = '';
+  if (!/^[\p{L}\p{N}_]+$/u.test(trimmedUsername)) {
+    usernameValidation.isValid = false;
+    usernameValidation.error = 'Username can only contain letters, numbers, and underscores';
     return;
   }
   
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    emailValidation.isValid = false;
-    emailValidation.error = 'Please enter a valid email address';
-    return;
-  }
-  
-  emailValidation.isValid = true;
-  emailValidation.error = '';
+  usernameValidation.isValid = true;
+  usernameValidation.error = '';
 };
 
 const startOnboarding = () => {
+  // Just move to next step - let user type their own username
   currentStep.value = 2;
 };
 
@@ -420,27 +319,24 @@ const createAccount = async () => {
   try {
     loading.value = true;
     
-    // Get current theme preferences
+    // Get current theme preferences - extract actual values from refs
     const themePreferences = {
-      theme: themeStore.currentTheme,
-      color: themeStore.currentColor,
+      color: themeStore.currentColor?.value || 'emerald',
       dark_mode: isDark.value
     };
     
-    // Create the user profile
+    // Create the user profile - match exact Candid field order
     const userProfile = {
-      name: profile.name,
-      email: profile.email,
-      bio: profile.bio || null,
-      avatar_url: null,
-      theme_preferences: themePreferences
+      bio: [], // Bio is optional - empty array for opt text
+      username: profile.username || 'User', // Use the actual username from form, fallback to 'User'
+      avatar_url: [], // Avatar is optional - empty array for opt text
+      name: profile.username || 'User', // Name is required text, use username or fallback
+      theme_preferences: [themePreferences], // Theme preferences - convert to opt record format
+      email: [] // Email is optional - empty array for opt text
     };
     
     // Create guest account with profile
     await authStore.createGuestAccount(userProfile);
-    
-    // Get the seed phrase for display
-    seedPhrase.value = authStore.getSeedPhrase;
     
     // Move to success step
     currentStep.value = 3;
@@ -461,14 +357,32 @@ const handleSignIn = async () => {
     signInLoading.value = true;
     signInError.value = '';
     
+    console.log('Attempting to sign in with seed phrase...');
+    
+    // Recover account using seed phrase
     await authStore.recoverAccount(signInSeedPhrase.value.trim());
     
-    // Close modal and redirect
-    showSignInModal.value = false;
-    signInSeedPhrase.value = '';
+    // Check if user exists in backend
+    console.log('Checking if user exists in backend...');
+    const { backend } = await import('../../../../declarations/backend');
+    const isRegistered = await backend.is_user_registered();
     
-    // Redirect to dashboard
-    await router.push('/');
+    console.log('User registration status:', isRegistered);
+    
+    if (isRegistered) {
+      console.log('User exists, proceeding to dashboard...');
+      // Close modal and redirect to dashboard
+      showSignInModal.value = false;
+      signInSeedPhrase.value = '';
+      await router.push('/');
+    } else {
+      console.log('User does not exist, redirecting to registration...');
+      // User doesn't exist, redirect to registration
+      showSignInModal.value = false;
+      signInSeedPhrase.value = '';
+      // Stay on LoginForm for registration
+      currentStep.value = 2;
+    }
   } catch (error) {
     console.error('Sign in failed:', error);
     signInError.value = error.message || 'Failed to sign in. Please check your recovery phrase.';
@@ -479,267 +393,5 @@ const handleSignIn = async () => {
 </script>
 
 <style scoped>
-.login-container {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 1rem;
-}
-
-.login-panel {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  padding: 3rem;
-  max-width: 400px;
-  width: 100%;
-}
-
-.logo-section {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-
-.app-title {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-}
-
-.app-subtitle {
-  color: #6b7280;
-  font-size: 1rem;
-}
-
-.auth-section {
-  text-align: center;
-}
-
-.section-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-}
-
-.auth-button {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: 1rem;
-}
-
-.guest-button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.guest-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.guest-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.recovery-button {
-  background: #f3f4f6;
-  color: #374151;
-  border: 1px solid #d1d5db;
-}
-
-.recovery-button:hover {
-  background: #e5e7eb;
-}
-
-.button-content {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-}
-
-.button-icon {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-.button-text {
-  font-weight: 500;
-}
-
-.divider {
-  position: relative;
-  margin: 1.5rem 0;
-}
-
-.divider::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #e5e7eb;
-}
-
-.divider-text {
-  background: white;
-  padding: 0 1rem;
-  color: #6b7280;
-  font-size: 0.875rem;
-}
-
-.info-text {
-  margin-top: 1.5rem;
-  text-align: left;
-}
-
-.info-text p {
-  color: #6b7280;
-  font-size: 0.875rem;
-  margin-bottom: 0.5rem;
-  line-height: 1.4;
-}
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 500px;
-  width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
-}
-
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.modal-header h3 {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-}
-
-.close-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 4px;
-  color: #6b7280;
-}
-
-.close-button:hover {
-  background: #f3f4f6;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.modal-description {
-  color: #6b7280;
-  margin-bottom: 1rem;
-  line-height: 1.5;
-}
-
-.seed-phrase-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  font-family: monospace;
-  font-size: 0.875rem;
-  resize: vertical;
-  margin-bottom: 1rem;
-}
-
-.seed-phrase-input:focus {
-  outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-}
-
-.error-message {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-  padding: 0.5rem;
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 4px;
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-}
-
-.recovery-submit-button {
-  background: #667eea;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.recovery-submit-button:hover:not(:disabled) {
-  background: #5a67d8;
-}
-
-.recovery-submit-button:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-/* Responsive Design */
-@media (max-width: 640px) {
-  .login-panel {
-    padding: 2rem;
-    margin: 1rem;
-  }
-  
-  .app-title {
-    font-size: 1.75rem;
-  }
-  
-  .modal-content {
-    margin: 1rem;
-  }
-}
-</style> 
+/* Add any additional styles here */
+</style>

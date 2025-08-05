@@ -7,13 +7,10 @@
         <Button
           variant="outline"
           size="icon"
-          class="w-8 h-8 relative overflow-hidden"
-          :style="{ backgroundColor: `hsl(${currentColorConfig.primary})` }"
+          class="w-8 h-8"
           @click="cycleColor"
         >
-          <div class="w-4 h-4 rounded-full border-2 border-white/40 bg-white/30 flex items-center justify-center">
-            <div class="w-2 h-2 rounded-full shadow-sm" :style="{ backgroundColor: `hsl(${currentColorConfig.primary})` }"></div>
-          </div>
+          <div class="w-4 h-4 rounded-full bg-primary"></div>
         </Button>
         
         <!-- Theme Switcher -->

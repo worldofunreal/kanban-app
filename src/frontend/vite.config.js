@@ -17,10 +17,14 @@ export default defineConfig({
       },
     },
   },
+  define: {
+    'process.env.CANISTER_ID_BACKEND': JSON.stringify(process.env.CANISTER_ID_BACKEND),
+    'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
+  },
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:4943',
+        target: 'http://127.0.0.1:8080',
         changeOrigin: true,
       },
     },

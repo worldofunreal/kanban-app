@@ -46,8 +46,8 @@ export const useAuthStore = defineStore('auth', {
           // User has existing session, verify with backend
           await this.verifyUserRegistration();
         } else {
-          // No existing session, create guest account
-          await this.createGuestAccount();
+          // No existing session, just wait for user to log in
+          console.log('No existing session found. User needs to log in.');
         }
       } catch (error) {
         console.error('Auth initialization failed:', error);
@@ -84,7 +84,25 @@ export const useAuthStore = defineStore('auth', {
         this.saveStateToLocalStorage();
 
         // Create user profile in backend
-        await this.createUserProfile();
+        try {
+          console.log('Attempting to create user profile...');
+          const created = await this.createUserProfile();
+          if (created) {
+            console.log('User profile created successfully');
+          } else {
+            console.log('User already exists, getting existing profile...');
+            await this.verifyUserRegistration();
+          }
+        } catch (error) {
+          console.log('Error in createUserProfile:', error.message);
+          // If user already exists, try to get the existing user
+          if (error.message.includes('AlreadyExists')) {
+            console.log('User already exists, getting existing profile...');
+            await this.verifyUserRegistration();
+          } else {
+            throw error;
+          }
+        }
 
         console.log('Guest account created successfully');
         return { success: true, principal: identity.getPrincipal().toText() };
@@ -108,9 +126,11 @@ export const useAuthStore = defineStore('auth', {
         const result = await backend.create_user({
           name: username,
           email: '',
-          bio: null,
-          avatar_url: null,
+          bio: [],
+          avatar_url: [],
         });
+
+        console.log('Backend result:', result);
 
         if ('Ok' in result) {
           this.user = result.Ok;
@@ -118,7 +138,9 @@ export const useAuthStore = defineStore('auth', {
           this.saveStateToLocalStorage();
           console.log('User profile created:', this.user);
         } else {
-          throw new Error(result.Err || 'Failed to create user profile');
+          // Don't throw error, just return false to indicate failure
+          console.log('User profile creation failed:', result.Err);
+          return false;
         }
       } catch (error) {
         console.error('Failed to create user profile:', error);
@@ -139,15 +161,15 @@ export const useAuthStore = defineStore('auth', {
         const { backend } = await import('../../../declarations/backend');
 
         // Get user profile
-        const result = await backend.get_user(principal);
+        const result = await backend.get_current_user();
 
-        if ('Ok' in result && result.Ok) {
-          this.user = result.Ok;
+        if (result) {
+          this.user = result;
           this.registered = true;
           this.saveStateToLocalStorage();
           console.log('User profile verified:', this.user);
         } else {
-          // User exists but no profile, create one
+          // User doesn't exist, create one
           await this.createUserProfile();
         }
       } catch (error) {
@@ -210,8 +232,16 @@ export const useAuthStore = defineStore('auth', {
         // Import backend canister
         const { backend } = await import('../../../declarations/backend');
 
+        // Format updates for UserProfileUpdate type
+        const formattedUpdates = {
+          name: updates.name,
+          email: updates.email,
+          bio: updates.bio !== undefined ? [updates.bio] : [],
+          avatar_url: updates.avatar_url !== undefined ? [updates.avatar_url] : [],
+        };
+
         // Update user profile
-        const result = await backend.update_user(principal, updates);
+        const result = await backend.update_profile(principal, formattedUpdates);
 
         if ('Ok' in result) {
           this.user = result.Ok;
@@ -258,7 +288,15 @@ export const useAuthStore = defineStore('auth', {
           seedPhrase: this.seedPhrase,
         };
 
-        localStorage.setItem('authStore', JSON.stringify(stateToSave));
+        // Custom JSON serializer that handles BigInt
+        const jsonString = JSON.stringify(stateToSave, (key, value) => {
+          if (typeof value === 'bigint') {
+            return value.toString();
+          }
+          return value;
+        });
+
+        localStorage.setItem('authStore', jsonString);
         console.log('Auth state saved to localStorage');
       } catch (error) {
         console.error('Failed to save auth state:', error);
@@ -334,8 +372,8 @@ export const useAuthStore = defineStore('auth', {
         const result = await backend.create_user({
           name: profile.name,
           email: profile.email,
-          bio: profile.bio,
-          avatar_url: profile.avatar_url,
+          bio: profile.bio || [],
+          avatar_url: profile.avatar_url || [],
         });
 
         if ('Ok' in result) {

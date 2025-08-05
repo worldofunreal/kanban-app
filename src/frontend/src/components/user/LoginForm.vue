@@ -104,8 +104,12 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
-import { Button } from '@/components/ui/Button.vue';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card.vue';
+import Button from '@/components/ui/Button.vue';
+import Card from '@/components/ui/Card.vue';
+import CardHeader from '@/components/ui/CardHeader.vue';
+import CardTitle from '@/components/ui/CardTitle.vue';
+import CardDescription from '@/components/ui/CardDescription.vue';
+import CardContent from '@/components/ui/CardContent.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -121,8 +125,8 @@ const handleGuestLogin = async () => {
     loading.value = true;
     await authStore.createGuestAccount();
     
-    // Show seed phrase to user
-    showSeedPhraseModal();
+    // Redirect to dashboard
+    await router.push('/');
   } catch (error) {
     console.error('Guest login failed:', error);
     alert('Failed to create guest account. Please try again.');
@@ -152,15 +156,7 @@ const handleRecovery = async () => {
   }
 };
 
-const showSeedPhraseModal = () => {
-  const seedPhrase = authStore.getSeedPhrase;
-  const message = `Your account has been created successfully!\n\nIMPORTANT: Save this seed phrase to recover your account:\n\n${seedPhrase}\n\nWrite it down and keep it safe!`;
-  
-  alert(message);
-  
-  // Redirect to dashboard
-  router.push('/');
-};
+
 </script>
 
 <style scoped>

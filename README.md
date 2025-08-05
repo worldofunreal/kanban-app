@@ -1,61 +1,197 @@
-# `kanban-app`
+# Kanban App - Collaborative Project Management on Internet Computer
 
-Welcome to your new `kanban-app` project and to the Internet Computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.
+A modern, collaborative project and team management application built on the Internet Computer (ICP) with Rust backend and Vue.js frontend, inspired by Jira and Trello workflow builders.
 
-To get started, you might want to explore the project directory structure and the default configuration file. Working with this project in your development environment will not affect any production deployment or identity tokens.
+## 🚀 Features
 
-To learn more before you start working with `kanban-app`, see the following documentation available online:
+### Core Functionality
+- **User Management**: Sign up, login, and profile management
+- **Team Management**: Create, edit, and manage teams with privacy controls
+- **Project Management**: Create projects owned by individuals or teams
+- **Role-Based Access Control**: Owner, Manager, and Collaborator roles
+- **Invitation System**: Invite users via links with role assignment
+- **Modern UI**: Responsive design with Vue 3 and TailwindCSS
 
-- [Quick Start](https://internetcomputer.org/docs/current/developer-docs/setup/deploy-locally)
-- [SDK Developer Tools](https://internetcomputer.org/docs/current/developer-docs/setup/install)
-- [Rust Canister Development Guide](https://internetcomputer.org/docs/current/developer-docs/backend/rust/)
-- [ic-cdk](https://docs.rs/ic-cdk)
-- [ic-cdk-macros](https://docs.rs/ic-cdk-macros)
-- [Candid Introduction](https://internetcomputer.org/docs/current/developer-docs/backend/candid/)
+### User Roles
+- **Owner**: Full permissions, can transfer ownership
+- **Manager**: Can edit projects/teams and invite others
+- **Collaborator**: Can use features but cannot manage teams/projects
 
-If you want to start working on your project right away, you might want to try the following commands:
+### Privacy Features
+- Public/private teams and projects
+- Invite-only access control
+- Role-based permissions
 
-```bash
-cd kanban-app/
-dfx help
-dfx canister --help
+## 🛠 Tech Stack
+
+### Backend (Internet Computer)
+- **Language**: Rust
+- **Framework**: DFX (Internet Computer SDK)
+- **Authentication**: Internet Identity integration
+- **Storage**: Canister stable memory
+- **Interface**: Candid
+
+### Frontend
+- **Framework**: Vue 3 with Composition API
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **State Management**: Pinia
+- **Routing**: Vue Router
+- **UI Components**: Headless UI
+
+## 📁 Project Structure
+
+```
+kanban-app/
+├── src/
+│   ├── backend/                 # Rust canister
+│   │   ├── src/
+│   │   │   ├── lib.rs          # Main canister logic
+│   │   │   ├── models/         # Data structures
+│   │   │   ├── handlers/       # Request handlers
+│   │   │   └── utils/          # Utility functions
+│   │   └── kanban-app-backend.did  # Candid interface
+│   └── frontend/               # Vue.js application
+│       ├── src/
+│       │   ├── components/     # Vue components
+│       │   ├── views/          # Page components
+│       │   ├── stores/         # Pinia stores
+│       │   ├── router/         # Vue Router configuration
+│       │   └── utils/          # Utility functions
+│       └── public/             # Static assets
+├── dfx.json                    # DFX configuration
+└── package.json               # Frontend dependencies
 ```
 
-## Running the project locally
+## 🚀 Getting Started
 
-If you want to test your project locally, you can use the following commands:
+### Prerequisites
+- [DFX](https://internetcomputer.org/docs/current/developer-docs/setup/install/) installed
+- [Node.js](https://nodejs.org/) (v16 or higher)
+- [Rust](https://rustup.rs/) and Cargo
 
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd kanban-app
+   ```
+
+2. **Install frontend dependencies**
+   ```bash
+   cd src/frontend
+   npm install
+   ```
+
+3. **Start local Internet Computer**
 ```bash
-# Starts the replica, running in the background
 dfx start --background
+   ```
 
-# Deploys your canisters to the replica and generates your candid interface
+4. **Deploy the canisters**
+   ```bash
 dfx deploy
 ```
 
-Once the job completes, your application will be available at `http://localhost:4943?canisterId={asset_canister_id}`.
-
-If you have made changes to your backend canister, you can generate a new candid interface with
-
+5. **Start the frontend development server**
 ```bash
-npm run generate
-```
+   cd src/frontend
+   npm run dev
+   ```
 
-at any time. This is recommended before starting the frontend development server, and will be run automatically any time you run `dfx deploy`.
+### Development Workflow
 
-If you are making frontend changes, you can start a development server with
+1. **Backend Development**
+   - Edit Rust code in `src/backend/src/`
+   - Update Candid interface in `src/backend/kanban-app-backend.did`
+   - Deploy with `dfx deploy backend`
 
-```bash
-npm start
-```
+2. **Frontend Development**
+   - Edit Vue components in `src/frontend/src/`
+   - Run `npm run dev` for hot reload
+   - Build with `npm run build`
 
-Which will start a server at `http://localhost:8080`, proxying API requests to the replica at port 4943.
+## 📋 API Reference
 
-### Note on frontend environment variables
+### User Management
+- `create_user(profile: UserProfile) -> Result<UserId, Error>`
+- `get_user(user_id: UserId) -> Option<User>`
+- `update_profile(user_id: UserId, profile: UserProfile) -> Result<(), Error>`
 
-If you are hosting frontend code somewhere without using DFX, you may need to make one of the following adjustments to ensure your project does not fetch the root key in production:
+### Team Management
+- `create_team(name: String, description: String, is_public: bool) -> Result<TeamId, Error>`
+- `get_team(team_id: TeamId) -> Option<Team>`
+- `update_team(team_id: TeamId, updates: TeamUpdate) -> Result<(), Error>`
+- `delete_team(team_id: TeamId) -> Result<(), Error>`
 
-- set`DFX_NETWORK` to `ic` if you are using Webpack
-- use your own preferred method to replace `process.env.DFX_NETWORK` in the autogenerated declarations
-  - Setting `canisters -> {asset_canister_id} -> declarations -> env_override to a string` in `dfx.json` will replace `process.env.DFX_NETWORK` with the string in the autogenerated declarations
-- Write your own `createActor` constructor
+### Project Management
+- `create_project(name: String, description: String, owner: Owner) -> Result<ProjectId, Error>`
+- `get_project(project_id: ProjectId) -> Option<Project>`
+- `update_project(project_id: ProjectId, updates: ProjectUpdate) -> Result<(), Error>`
+- `transfer_ownership(project_id: ProjectId, new_owner: Owner) -> Result<(), Error>`
+
+### Access Control
+- `invite_user(target: InviteTarget, role: Role, expires_at: Option<Timestamp>) -> Result<InviteId, Error>`
+- `accept_invite(invite_id: InviteId) -> Result<(), Error>`
+- `remove_member(target: InviteTarget, user_id: UserId) -> Result<(), Error>`
+
+## 🔐 Security & Privacy
+
+- **Internet Identity Integration**: Secure authentication via Internet Identity
+- **Role-Based Access Control**: Granular permissions based on user roles
+- **Invite-Only Access**: Private teams and projects require explicit invitations
+- **Ownership Transfer**: Secure transfer of project/team ownership
+
+## 🎨 UI/UX Features
+
+- **Responsive Design**: Works on desktop, tablet, and mobile
+- **Dark/Light Mode**: Toggle between themes
+- **Real-time Updates**: Live collaboration features
+- **Drag & Drop**: Intuitive project management interface
+- **Search & Filter**: Easy navigation through projects and teams
+
+## 🚧 Roadmap
+
+### Phase 1 (Current)
+- [x] Basic user authentication
+- [x] Team and project creation
+- [x] Role-based access control
+- [x] Invitation system
+
+### Phase 2
+- [ ] Kanban board implementation
+- [ ] Task management
+- [ ] File attachments
+- [ ] Activity feed
+
+### Phase 3
+- [ ] Advanced workflow automation
+- [ ] Time tracking
+- [ ] Reporting and analytics
+- [ ] Mobile app
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Documentation**: Check the inline code comments and this README
+- **Issues**: Report bugs and feature requests via GitHub Issues
+- **Discussions**: Join the community discussions for questions and ideas
+
+## 🔗 Links
+
+- [Internet Computer Documentation](https://internetcomputer.org/docs/current/developer-docs/)
+- [DFX Documentation](https://internetcomputer.org/docs/current/developer-docs/setup/install/)
+- [Vue.js Documentation](https://vuejs.org/)
+- [TailwindCSS Documentation](https://tailwindcss.com/)

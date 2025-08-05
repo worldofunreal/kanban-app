@@ -1,19 +1,19 @@
 {
   "canisters": {
-    "kanban-app-backend": {
-      "candid": "src/kanban-app-backend/kanban-app-backend.did",
-      "package": "kanban-app-backend",
+    "backend": {
+      "candid": "src/backend/backend.did",
+      "package": "backend",
       "type": "rust"
     },
-    "kanban-app-frontend": {
+    "frontend": {
       "dependencies": [
-        "kanban-app-backend"
+        "backend"
       ],
       "source": [
-        "src/kanban-app-frontend/dist"
+        "src/frontend/dist"
       ],
       "type": "assets",
-      "workspace": "kanban-app-frontend"
+      "workspace": "frontend"
     }
   },
   "defaults": {

@@ -117,7 +117,7 @@
         <DialogHeader>
           <DialogTitle>Create New Team</DialogTitle>
         </DialogHeader>
-        <form @submit.prevent="createTeam" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="createTeam">
           <div class="space-y-2">
             <Label for="team-name">Team Name</Label>
             <Input
@@ -175,8 +175,7 @@ import { useAuthStore } from '../stores/auth'
 import { useTeamsStore } from '../stores/teams'
 import Button from '../components/ui/Button.vue'
 import Card from '../components/ui/Card.vue'
-import CardHeader from '../components/ui/CardHeader.vue'
-import CardTitle from '../components/ui/CardTitle.vue'
+
 import CardContent from '../components/ui/CardContent.vue'
 import Badge from '../components/ui/Badge.vue'
 import Input from '../components/ui/Input.vue'

@@ -154,9 +154,6 @@ export const useAuthStore = defineStore('auth', {
         if (!identity) {
           throw new Error('No identity available');
         }
-
-        const principal = identity.getPrincipal().toText();
-
         // Import backend canister
         const { backend } = await import('../../../declarations/backend');
 

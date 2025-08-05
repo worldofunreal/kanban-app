@@ -220,10 +220,8 @@ import Button from '../components/ui/Button.vue'
 import Card from '../components/ui/Card.vue'
 import CardHeader from '../components/ui/CardHeader.vue'
 import CardTitle from '../components/ui/CardTitle.vue'
-import CardDescription from '../components/ui/CardDescription.vue'
 import CardContent from '../components/ui/CardContent.vue'
 import Badge from '../components/ui/Badge.vue'
-import Separator from '../components/ui/Separator.vue'
 import ThemeSwitcher from '../components/ThemeSwitcher.vue'
 
 const authStore = useAuthStore()

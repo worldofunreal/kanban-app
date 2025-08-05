@@ -24,7 +24,7 @@
 <script setup>
 import { cn } from '@/lib/utils'
 
-const props = defineProps({
+defineProps({
   variant: {
     type: String,
     default: 'default',

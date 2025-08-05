@@ -117,7 +117,7 @@
         <DialogHeader>
           <DialogTitle>Create New Project</DialogTitle>
         </DialogHeader>
-        <form @submit.prevent="createProject" class="space-y-4">
+        <form class="space-y-4" @submit.prevent="createProject">
           <div class="space-y-2">
             <Label for="project-name">Project Name</Label>
             <Input
@@ -199,14 +199,11 @@ import { useProjectsStore } from '../stores/projects'
 import { useTeamsStore } from '../stores/teams'
 import Button from '../components/ui/Button.vue'
 import Card from '../components/ui/Card.vue'
-import CardHeader from '../components/ui/CardHeader.vue'
-import CardTitle from '../components/ui/CardTitle.vue'
 import CardContent from '../components/ui/CardContent.vue'
 import Badge from '../components/ui/Badge.vue'
 import Input from '../components/ui/Input.vue'
 import Label from '../components/ui/Label.vue'
 import Textarea from '../components/ui/Textarea.vue'
-import Checkbox from '../components/ui/Checkbox.vue'
 import Dialog from '../components/ui/Dialog.vue'
 import DialogContent from '../components/ui/DialogContent.vue'
 import DialogHeader from '../components/ui/DialogHeader.vue'

@@ -53,8 +53,8 @@
             class="relative w-12 h-12 rounded-lg border-2 transition-all hover:scale-105"
             :class="themeStore.currentColor === key ? 'border-primary' : 'border-border'"
             :style="{ backgroundColor: `hsl(${color.primary})` }"
-            @click="themeStore.setColor(key)"
             :title="color.name"
+            @click="themeStore.setColor(key)"
           >
             <div
               v-if="themeStore.currentColor === key"

@@ -1,4 +1,4 @@
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 
 const currentTheme = ref(localStorage.getItem('theme') || 'default')
 const currentColor = ref(localStorage.getItem('color') || 'neutral')

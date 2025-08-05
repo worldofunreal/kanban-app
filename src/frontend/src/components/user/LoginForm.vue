@@ -1,69 +1,270 @@
 <template>
   <div class="min-h-screen flex items-center justify-center bg-background p-4">
-    <Card class="w-full max-w-md">
+    <Card class="w-full max-w-md relative">
+      <!-- Theme Switchers - Top Right -->
+      <div v-if="currentStep === 1" class="absolute top-4 right-4 flex space-x-2 z-10">
+        <!-- Color Switcher -->
+        <Button
+          variant="outline"
+          size="icon"
+          class="w-8 h-8 relative overflow-hidden"
+          :style="{ backgroundColor: `hsl(${currentColorConfig.primary})` }"
+          @click="cycleColor"
+        >
+          <div class="w-4 h-4 rounded-full border-2 border-white/40 bg-white/30 flex items-center justify-center">
+            <div class="w-2 h-2 rounded-full shadow-sm" :style="{ backgroundColor: `hsl(${currentColorConfig.primary})` }"></div>
+          </div>
+        </Button>
+        
+        <!-- Theme Switcher -->
+        <Button
+          variant="outline"
+          size="icon"
+          class="w-8 h-8"
+          @click="themeStore.toggleDarkMode"
+        >
+          <svg
+            v-if="!isDark"
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <svg
+            v-else
+            class="h-4 w-4"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </Button>
+      </div>
+
       <CardHeader class="text-center">
         <CardTitle class="text-2xl font-bold">Kanban App</CardTitle>
         <CardDescription>Collaborative Project Management</CardDescription>
       </CardHeader>
       
       <CardContent class="space-y-6">
-        <div class="text-center">
-          <h2 class="text-xl font-semibold">Get Started</h2>
+        <!-- Step 1: Welcome -->
+        <div v-if="currentStep === 1" class="space-y-6">
+          <div class="text-center">
+            <h2 class="text-xl font-semibold">Welcome!</h2>
+            <p class="text-sm text-muted-foreground mt-2">
+              Get started with your collaborative workspace
+            </p>
+          </div>
+          
+          <Button 
+            :disabled="loading" 
+            class="w-full"
+            @click="startOnboarding"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+              </svg>
+              <span>
+                {{ loading ? 'Setting up...' : 'Get Started' }}
+              </span>
+            </div>
+          </Button>
+
+          <div class="relative">
+            <div class="absolute inset-0 flex items-center">
+              <span class="w-full border-t" />
+            </div>
+            <div class="relative flex justify-center text-xs uppercase">
+              <span class="bg-background px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+
+          <Button 
+            variant="outline"
+            class="w-full"
+            @click="showSignInModal = true"
+          >
+            <div class="flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v12a1 1 0 01-1 1H4a1 1 0 01-1-1V3zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+              </svg>
+              <span>Sign In</span>
+            </div>
+          </Button>
         </div>
-        
-        <!-- Guest Account Button -->
-        <Button 
-          :disabled="loading" 
-          class="w-full"
-          @click="handleGuestLogin"
-        >
-          <div class="flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-            </svg>
-            <span>
-              {{ loading ? 'Creating Account...' : 'Continue as Guest' }}
-            </span>
-          </div>
-        </Button>
 
-        <div class="relative">
-          <div class="absolute inset-0 flex items-center">
-            <span class="w-full border-t" />
+        <!-- Step 2: Profile Setup -->
+        <div v-if="currentStep === 2" class="space-y-6">
+          <!-- Progress Indicator -->
+          <div class="space-y-2">
+            <div class="flex justify-between text-sm text-muted-foreground">
+              <span>Step 2 of 3</span>
+              <span>Profile Setup</span>
+            </div>
+            <div class="w-full bg-muted rounded-full h-2">
+              <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 66%"></div>
+            </div>
           </div>
-          <div class="relative flex justify-center text-xs uppercase">
-            <span class="bg-background px-2 text-muted-foreground">or</span>
+
+          <div class="text-center">
+            <h2 class="text-xl font-semibold">Tell us about yourself</h2>
+            <p class="text-sm text-muted-foreground mt-2">
+              This helps personalize your experience
+            </p>
+          </div>
+          
+          <div class="space-y-4">
+            <!-- Name Field -->
+            <div>
+              <Label for="name" class="flex items-center gap-2">
+                Full Name
+                <span class="text-destructive">*</span>
+                <div v-if="nameValidation.isValid && profile.name" class="flex-shrink-0">
+                  <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </Label>
+              <Input
+                id="name"
+                v-model="profile.name"
+                placeholder="Enter your full name"
+                class="mt-1"
+                :class="nameValidation.isValid && profile.name ? 'border-green-500' : nameValidation.error ? 'border-destructive' : ''"
+                @input="validateName"
+              />
+              <p v-if="nameValidation.error" class="text-sm text-destructive mt-1">{{ nameValidation.error }}</p>
+            </div>
+            
+            <!-- Email Field -->
+            <div>
+              <Label for="email" class="flex items-center gap-2">
+                Email Address
+                <span class="text-destructive">*</span>
+                <div v-if="emailValidation.isValid && profile.email" class="flex-shrink-0">
+                  <svg class="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                  </svg>
+                </div>
+              </Label>
+              <Input
+                id="email"
+                v-model="profile.email"
+                type="email"
+                placeholder="Enter your email"
+                class="mt-1"
+                :class="emailValidation.isValid && profile.email ? 'border-green-500' : emailValidation.error ? 'border-destructive' : ''"
+                @input="validateEmail"
+              />
+              <p v-if="emailValidation.error" class="text-sm text-destructive mt-1">{{ emailValidation.error }}</p>
+            </div>
+            
+            <!-- Bio Field (Collapsible) -->
+            <div>
+              <Button
+                variant="ghost"
+                class="p-0 h-auto text-sm text-muted-foreground hover:text-foreground"
+                @click="showBio = !showBio"
+              >
+                <div class="flex items-center gap-2">
+                  <svg 
+                    class="w-4 h-4 transition-transform" 
+                    :class="showBio ? 'rotate-90' : ''"
+                    fill="currentColor" 
+                    viewBox="0 0 20 20"
+                  >
+                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                  </svg>
+                  Add bio (optional)
+                </div>
+              </Button>
+              
+              <div v-if="showBio" class="mt-3 space-y-2">
+                <Label for="bio">Bio</Label>
+                <Textarea
+                  id="bio"
+                  v-model="profile.bio"
+                  placeholder="Tell us about yourself"
+                  rows="3"
+                  maxlength="200"
+                />
+                <p class="text-xs text-muted-foreground text-right">
+                  {{ profile.bio.length }}/200 characters
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex gap-3">
+            <Button 
+              variant="outline" 
+              class="flex-1"
+              @click="currentStep = 1"
+            >
+              Back
+            </Button>
+            <Button 
+              :disabled="!isStep2Valid || loading"
+              class="flex-1"
+              @click="createAccount"
+            >
+              {{ loading ? 'Creating Account...' : 'Continue' }}
+            </Button>
           </div>
         </div>
 
-        <!-- Account Recovery -->
-        <Button 
-          variant="outline"
-          class="w-full"
-          @click="showRecoveryModal = true"
-        >
-          <div class="flex items-center justify-center gap-2">
-            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
-            </svg>
-            <span>Recover Account</span>
+        <!-- Step 3: Success -->
+        <div v-if="currentStep === 3" class="space-y-6">
+          <div class="text-center">
+            <div class="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <h2 class="text-xl font-semibold">Account Created!</h2>
+            <p class="text-sm text-muted-foreground mt-2">
+              Your account has been successfully created
+            </p>
           </div>
-        </Button>
-
-        <div class="text-center text-sm text-muted-foreground space-y-1">
-          <p>Guest accounts are automatically created and saved locally.</p>
-          <p>Save your seed phrase to recover your account later.</p>
+          
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+              <svg class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <div>
+                <h4 class="font-medium text-amber-800">Save Your Recovery Phrase</h4>
+                <p class="text-sm text-amber-700 mt-1">
+                  Write down this 12-word phrase to recover your account later:
+                </p>
+                <div class="mt-3 p-3 bg-white border border-amber-300 rounded font-mono text-sm">
+                  {{ seedPhrase }}
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <Button 
+            class="w-full"
+            @click="goToDashboard"
+          >
+            Continue to Dashboard
+          </Button>
         </div>
       </CardContent>
     </Card>
 
-    <!-- Recovery Modal -->
-    <div v-if="showRecoveryModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <!-- Sign In Modal -->
+    <div v-if="showSignInModal" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <Card class="w-full max-w-md">
         <CardHeader>
           <div class="flex items-center justify-between">
-            <CardTitle>Recover Account</CardTitle>
-            <Button variant="ghost" size="icon" @click="showRecoveryModal = false">
+            <CardTitle>Sign In</CardTitle>
+            <Button variant="ghost" size="icon" @click="showSignInModal = false">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
               </svg>
@@ -73,25 +274,26 @@
         
         <CardContent class="space-y-4">
           <p class="text-sm text-muted-foreground">
-            Enter your 12-word seed phrase to recover your account:
+            Enter your 12-word recovery phrase to sign in:
           </p>
           
-          <textarea
-            v-model="recoverySeedPhrase"
-            placeholder="Enter your 12-word seed phrase..."
-            class="w-full min-h-[80px] p-3 border border-input bg-background rounded-md text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-          ></textarea>
+          <Textarea
+            v-model="signInSeedPhrase"
+            placeholder="Enter your 12-word recovery phrase..."
+            rows="4"
+            class="font-mono"
+          />
           
-          <div v-if="recoveryError" class="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-            <p class="text-sm text-destructive">{{ recoveryError }}</p>
+          <div v-if="signInError" class="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+            <p class="text-sm text-destructive">{{ signInError }}</p>
           </div>
           
           <div class="flex justify-end">
             <Button 
-              :disabled="recoveryLoading || !recoverySeedPhrase.trim()"
-              @click="handleRecovery"
+              :disabled="signInLoading || !signInSeedPhrase.trim()"
+              @click="handleSignIn"
             >
-              {{ recoveryLoading ? 'Recovering...' : 'Recover Account' }}
+              {{ signInLoading ? 'Signing In...' : 'Sign In' }}
             </Button>
           </div>
         </CardContent>
@@ -101,8 +303,9 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, reactive, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useThemeStore } from '@/stores/theme';
 import { useRouter } from 'vue-router';
 import Button from '@/components/ui/Button.vue';
 import Card from '@/components/ui/Card.vue';
@@ -110,53 +313,172 @@ import CardHeader from '@/components/ui/CardHeader.vue';
 import CardTitle from '@/components/ui/CardTitle.vue';
 import CardDescription from '@/components/ui/CardDescription.vue';
 import CardContent from '@/components/ui/CardContent.vue';
+import Input from '@/components/ui/Input.vue';
+import Label from '@/components/ui/Label.vue';
+import Textarea from '@/components/ui/Textarea.vue';
 
 const authStore = useAuthStore();
+const themeStore = useThemeStore();
 const router = useRouter();
 
+const currentStep = ref(1);
 const loading = ref(false);
-const showRecoveryModal = ref(false);
-const recoverySeedPhrase = ref('');
-const recoveryLoading = ref(false);
-const recoveryError = ref('');
+const showSignInModal = ref(false);
+const signInSeedPhrase = ref('');
+const signInLoading = ref(false);
+const signInError = ref('');
+const seedPhrase = ref('');
+const showBio = ref(false);
 
-const handleGuestLogin = async () => {
+const profile = reactive({
+  name: '',
+  email: '',
+  bio: ''
+});
+
+// Validation states
+const nameValidation = reactive({
+  isValid: false,
+  error: ''
+});
+
+const emailValidation = reactive({
+  isValid: false,
+  error: ''
+});
+
+
+
+const currentColorConfig = computed(() => {
+  return themeStore.colors[themeStore.currentColor] || themeStore.colors.neutral;
+});
+
+const isDark = computed(() => {
+  return document.documentElement.classList.contains('dark');
+});
+
+const isStep2Valid = computed(() => {
+  return nameValidation.isValid && emailValidation.isValid && profile.name && profile.email;
+});
+
+// Color cycling
+const colorKeys = Object.keys(themeStore.colors);
+let currentColorIndex = colorKeys.indexOf(themeStore.currentColor);
+
+const cycleColor = () => {
+  currentColorIndex = (currentColorIndex + 1) % colorKeys.length;
+  const nextColor = colorKeys[currentColorIndex];
+  themeStore.setColor(nextColor);
+};
+
+// Validation functions
+const validateName = () => {
+  const name = profile.name.trim();
+  if (!name) {
+    nameValidation.isValid = false;
+    nameValidation.error = '';
+    return;
+  }
+  
+  if (name.length < 2) {
+    nameValidation.isValid = false;
+    nameValidation.error = 'Name must be at least 2 characters long';
+    return;
+  }
+  
+  if (!/^[a-zA-Z\s]+$/.test(name)) {
+    nameValidation.isValid = false;
+    nameValidation.error = 'Name can only contain letters and spaces';
+    return;
+  }
+  
+  nameValidation.isValid = true;
+  nameValidation.error = '';
+};
+
+const validateEmail = () => {
+  const email = profile.email.trim();
+  if (!email) {
+    emailValidation.isValid = false;
+    emailValidation.error = '';
+    return;
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    emailValidation.isValid = false;
+    emailValidation.error = 'Please enter a valid email address';
+    return;
+  }
+  
+  emailValidation.isValid = true;
+  emailValidation.error = '';
+};
+
+const startOnboarding = () => {
+  currentStep.value = 2;
+};
+
+const createAccount = async () => {
   try {
     loading.value = true;
-    await authStore.createGuestAccount();
     
-    // Redirect to dashboard
-    await router.push('/');
+    // Get current theme preferences
+    const themePreferences = {
+      theme: themeStore.currentTheme,
+      color: themeStore.currentColor,
+      dark_mode: isDark.value
+    };
+    
+    // Create the user profile
+    const userProfile = {
+      name: profile.name,
+      email: profile.email,
+      bio: profile.bio || null,
+      avatar_url: null,
+      theme_preferences: themePreferences
+    };
+    
+    // Create guest account with profile
+    await authStore.createGuestAccount(userProfile);
+    
+    // Get the seed phrase for display
+    seedPhrase.value = authStore.getSeedPhrase;
+    
+    // Move to success step
+    currentStep.value = 3;
   } catch (error) {
-    console.error('Guest login failed:', error);
-    alert('Failed to create guest account. Please try again.');
+    console.error('Account creation failed:', error);
+    alert('Failed to create account. Please try again.');
   } finally {
     loading.value = false;
   }
 };
 
-const handleRecovery = async () => {
+const goToDashboard = async () => {
+  await router.push('/');
+};
+
+const handleSignIn = async () => {
   try {
-    recoveryLoading.value = true;
-    recoveryError.value = '';
+    signInLoading.value = true;
+    signInError.value = '';
     
-    await authStore.recoverAccount(recoverySeedPhrase.value.trim());
+    await authStore.recoverAccount(signInSeedPhrase.value.trim());
     
     // Close modal and redirect
-    showRecoveryModal.value = false;
-    recoverySeedPhrase.value = '';
+    showSignInModal.value = false;
+    signInSeedPhrase.value = '';
     
     // Redirect to dashboard
     await router.push('/');
   } catch (error) {
-    console.error('Recovery failed:', error);
-    recoveryError.value = error.message || 'Failed to recover account';
+    console.error('Sign in failed:', error);
+    signInError.value = error.message || 'Failed to sign in. Please check your recovery phrase.';
   } finally {
-    recoveryLoading.value = false;
+    signInLoading.value = false;
   }
 };
-
-
 </script>
 
 <style scoped>

@@ -79,6 +79,25 @@ async fn update_profile(user_id: String, profile_update: UserProfileUpdate) -> R
             if let Some(bio) = profile_update.bio {
                 user.profile.bio = bio;
             }
+            if let Some(theme_preferences) = profile_update.theme_preferences {
+                user.profile.theme_preferences = theme_preferences;
+            }
+            user.updated_at = time();
+            Ok(())
+        } else {
+            Err(Error::UserNotFound)
+        }
+    })
+}
+
+#[ic_cdk::update]
+async fn update_theme_preferences(theme_preferences: ThemePreferences) -> Result<(), Error> {
+    let caller_principal = msg_caller();
+    let user_id = get_current_user_id(&caller_principal)?;
+    
+    USERS.with(|users| {
+        if let Some(user) = users.borrow_mut().get_mut(&user_id) {
+            user.profile.theme_preferences = Some(theme_preferences);
             user.updated_at = time();
             Ok(())
         } else {

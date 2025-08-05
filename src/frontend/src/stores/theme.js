@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 
 const currentTheme = ref(localStorage.getItem('theme') || 'default')
-const currentColor = ref(localStorage.getItem('color') || 'neutral')
+const currentColor = ref(localStorage.getItem('color') || 'emerald')
 
 const themes = {
   default: {
@@ -140,6 +140,11 @@ export function useThemeStore() {
     if (themeConfig) {
       root.style.setProperty('--radius', themeConfig.radius)
     }
+    
+    // Schedule sync to backend
+    if (typeof window !== 'undefined' && window.themeSyncService) {
+      window.themeSyncService.scheduleThemeSync()
+    }
   }
 
   const setColor = (color) => {
@@ -153,6 +158,11 @@ export function useThemeStore() {
       root.style.setProperty('--primary', colorConfig.primary)
       root.style.setProperty('--primary-foreground', colorConfig.primaryForeground)
     }
+    
+    // Schedule sync to backend
+    if (typeof window !== 'undefined' && window.themeSyncService) {
+      window.themeSyncService.scheduleThemeSync()
+    }
   }
 
   const toggleDarkMode = () => {
@@ -164,19 +174,29 @@ export function useThemeStore() {
       document.documentElement.classList.add('dark')
       localStorage.setItem('darkMode', 'true')
     }
+    
+    // Schedule sync to backend
+    if (typeof window !== 'undefined' && window.themeSyncService) {
+      window.themeSyncService.scheduleThemeSync()
+    }
   }
 
   // Initialize theme on mount
   const initTheme = () => {
     const savedTheme = localStorage.getItem('theme') || 'default'
-    const savedColor = localStorage.getItem('color') || 'neutral'
-    const savedDarkMode = localStorage.getItem('darkMode') === 'true'
+    const savedColor = localStorage.getItem('color') || 'emerald'
+    const savedDarkMode = localStorage.getItem('darkMode')
     
     setTheme(savedTheme)
     setColor(savedColor)
     
-    if (savedDarkMode) {
+    // Only apply dark mode if explicitly saved as true
+    if (savedDarkMode === 'true') {
       document.documentElement.classList.add('dark')
+    } else {
+      // Default to light mode
+      document.documentElement.classList.remove('dark')
+      localStorage.setItem('darkMode', 'false')
     }
   }
 

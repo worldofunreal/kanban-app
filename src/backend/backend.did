@@ -57,17 +57,24 @@ type User = record {
   created_at : nat64;
   profile : UserProfile;
 };
+type ThemePreferences = record {
+  theme : text;
+  color : text;
+  dark_mode : bool;
+};
 type UserProfile = record {
   bio : opt text;
   avatar_url : opt text;
   name : text;
   email : text;
+  theme_preferences : opt ThemePreferences;
 };
 type UserProfileUpdate = record {
   bio : opt opt text;
   avatar_url : opt opt text;
   name : opt text;
   email : opt text;
+  theme_preferences : opt opt ThemePreferences;
 };
 service : {
   accept_invite : (text) -> (Result);
@@ -93,6 +100,7 @@ service : {
   remove_member : (InviteTarget, text) -> (Result);
   transfer_ownership : (text, Owner) -> (Result);
   update_profile : (text, UserProfileUpdate) -> (Result);
+  update_theme_preferences : (ThemePreferences) -> (Result);
   update_project : (text, ProjectUpdate) -> (Result);
   update_team : (text, TeamUpdate) -> (Result);
 }

@@ -61,7 +61,7 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Create a new guest account automatically
-    async createGuestAccount() {
+    async createGuestAccount(profile = null) {
       try {
         console.log('Creating new guest account...');
 
@@ -86,7 +86,7 @@ export const useAuthStore = defineStore('auth', {
         // Create user profile in backend
         try {
           console.log('Attempting to create user profile...');
-          const created = await this.createUserProfile();
+          const created = await this.createUserProfile(profile);
           if (created) {
             console.log('User profile created successfully');
           } else {
@@ -114,21 +114,23 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // Create user profile in the backend
-    async createUserProfile() {
+    async createUserProfile(profile = null) {
       try {
         const principal = identity.getPrincipal().toText();
-        const username = `User_${principal.slice(0, 8)}`;
+        
+        // Use provided profile or generate default one
+        const userProfile = profile || {
+          name: `User_${principal.slice(0, 8)}`,
+          email: '',
+          bio: [],
+          avatar_url: [],
+        };
 
         // Import backend canister
         const { backend } = await import('../../../declarations/backend');
 
         // Create user profile
-        const result = await backend.create_user({
-          name: username,
-          email: '',
-          bio: [],
-          avatar_url: [],
-        });
+        const result = await backend.create_user(userProfile);
 
         console.log('Backend result:', result);
 
@@ -137,6 +139,7 @@ export const useAuthStore = defineStore('auth', {
           this.registered = true;
           this.saveStateToLocalStorage();
           console.log('User profile created:', this.user);
+          return true;
         } else {
           // Don't throw error, just return false to indicate failure
           console.log('User profile creation failed:', result.Err);
@@ -165,6 +168,11 @@ export const useAuthStore = defineStore('auth', {
           this.registered = true;
           this.saveStateToLocalStorage();
           console.log('User profile verified:', this.user);
+          
+          // Load theme preferences if available
+          if (window.themeSyncService && result.profile?.theme_preferences) {
+            await window.themeSyncService.loadThemeFromBackend();
+          }
         } else {
           // User doesn't exist, create one
           await this.createUserProfile();

@@ -13,14 +13,16 @@ type Error = variant {
 };
 type Invite = record {
   id : text;
+  status : InviteStatus;
   role : Role;
   created_at : nat64;
   target : InviteTarget;
-  invited_by : text;
-  expires_at : opt nat64;
+  invited_by : principal;
+  invited_user : principal;
 };
+type InviteStatus = variant { Accepted; Declined; Cancelled; Pending };
 type InviteTarget = variant { Team : text; Project : text };
-type Owner = variant { Team : text; User : text };
+type Owner = variant { Team : text; User : principal };
 type Project = record {
   id : text;
   updated_at : nat64;
@@ -30,10 +32,15 @@ type Project = record {
   description : text;
   created_at : nat64;
 };
-type ProjectMember = record { role : Role; user_id : text; joined_at : nat64 };
+type ProjectMember = record {
+  "principal" : principal;
+  role : Role;
+  joined_at : nat64;
+};
 type ProjectUpdate = record { name : opt text; description : opt text };
 type Result = variant { Ok; Err : Error };
 type Result_1 = variant { Ok : text; Err : Error };
+type Result_2 = variant { Ok : principal; Err : Error };
 type Role = variant { Collaborator; Owner; Manager };
 type Team = record {
   id : text;
@@ -43,9 +50,13 @@ type Team = record {
   name : text;
   description : text;
   created_at : nat64;
-  owner_id : text;
+  owner_principal : principal;
 };
-type TeamMember = record { role : Role; user_id : text; joined_at : nat64 };
+type TeamMember = record {
+  "principal" : principal;
+  role : Role;
+  joined_at : nat64;
+};
 type TeamUpdate = record {
   is_public : opt bool;
   name : opt text;
@@ -53,8 +64,8 @@ type TeamUpdate = record {
 };
 type ThemePreferences = record { color : text; dark_mode : bool };
 type User = record {
-  id : text;
   updated_at : nat64;
+  "principal" : principal;
   created_at : nat64;
   profile : UserProfile;
 };
@@ -76,33 +87,30 @@ type UserProfileUpdate = record {
 };
 service : {
   accept_invite : (text) -> (Result);
+  cancel_invite : (text) -> (Result);
   create_project : (text, text, Owner) -> (Result_1);
   create_team : (text, text, bool) -> (Result_1);
-  create_user : (UserProfile) -> (Result_1);
+  create_user : (UserProfile) -> (Result_2);
   decline_invite : (text) -> (Result);
   delete_project : (text) -> (Result);
   delete_team : (text) -> (Result);
-  get_current_user : () -> (opt User) query;
-  get_invites : (text) -> (vec Invite) query;
-  get_pending_invites : (text) -> (vec Invite) query;
+  get_invites : (principal) -> (vec Invite) query;
+  get_pending_invites : (principal) -> (vec Invite) query;
   get_project : (text) -> (opt Project) query;
   get_public_teams : () -> (vec Team) query;
   get_team : (text) -> (opt Team) query;
   get_team_projects : (text) -> (vec Project) query;
-  get_user : (text) -> (opt User) query;
-  get_user_by_principal : (principal) -> (opt User) query;
-  get_user_projects : (text) -> (vec Project) query;
-  get_user_teams : (text) -> (vec Team) query;
+  get_user : (principal) -> (opt User) query;
+  get_user_projects : (principal) -> (vec Project) query;
+  get_user_teams : (principal) -> (vec Team) query;
   get_users : () -> (vec User) query;
   health_check : () -> (text) query;
-  invite_user : (InviteTarget, Role, opt nat64) -> (Result_1);
-  is_user_registered : () -> (bool) query;
-  is_username_available : (text) -> (bool) query;
-  remove_member : (InviteTarget, text) -> (Result);
+  invite_user : (InviteTarget, Role, principal) -> (Result_1);
+  remove_member : (InviteTarget, principal) -> (Result);
   transfer_ownership : (text, Owner) -> (Result);
-  update_profile : (text, UserProfileUpdate) -> (Result);
+  update_profile : (principal, UserProfileUpdate) -> (Result);
   update_project : (text, ProjectUpdate) -> (Result);
   update_team : (text, TeamUpdate) -> (Result);
   update_theme_preferences : (ThemePreferences) -> (Result);
-  update_username : (text, text) -> (Result);
+  update_username : (principal, text) -> (Result);
 }

@@ -1,8 +1,7 @@
-use candid::{CandidType, Deserialize};
+use candid::{CandidType, Deserialize, Principal};
 use serde::Serialize;
 
 // Type aliases
-pub type UserId = String;
 pub type TeamId = String;
 pub type ProjectId = String;
 pub type InviteId = String;
@@ -29,7 +28,7 @@ pub struct UserProfile {
 // Complete user data
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct User {
-    pub id: UserId,
+    pub principal: Principal,
     pub profile: UserProfile,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
@@ -46,7 +45,7 @@ pub enum Role {
 // Team member information
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct TeamMember {
-    pub user_id: UserId,
+    pub principal: Principal,
     pub role: Role,
     pub joined_at: Timestamp,
 }
@@ -58,7 +57,7 @@ pub struct Team {
     pub name: String,
     pub description: String,
     pub is_public: bool,
-    pub owner_id: UserId,
+    pub owner_principal: Principal,
     pub members: Vec<TeamMember>,
     pub created_at: Timestamp,
     pub updated_at: Timestamp,
@@ -67,14 +66,14 @@ pub struct Team {
 // Project owner can be a user or team
 #[derive(CandidType, Deserialize, Clone, Serialize, PartialEq, Eq)]
 pub enum Owner {
-    User(UserId),
+    User(Principal),
     Team(TeamId),
 }
 
 // Project member information
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct ProjectMember {
-    pub user_id: UserId,
+    pub principal: Principal,
     pub role: Role,
     pub joined_at: Timestamp,
 }
@@ -98,14 +97,24 @@ pub enum InviteTarget {
     Project(ProjectId),
 }
 
+// Invitation status
+#[derive(CandidType, Deserialize, Clone, Serialize, PartialEq, Eq)]
+pub enum InviteStatus {
+    Pending,
+    Accepted,
+    Declined,
+    Cancelled,
+}
+
 // Invitation information
 #[derive(CandidType, Deserialize, Clone, Serialize)]
 pub struct Invite {
     pub id: InviteId,
     pub target: InviteTarget,
     pub role: Role,
-    pub invited_by: UserId,
-    pub expires_at: Option<Timestamp>,
+    pub invited_by: Principal,
+    pub invited_user: Principal,
+    pub status: InviteStatus,
     pub created_at: Timestamp,
 }
 

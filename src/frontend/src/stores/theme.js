@@ -17,31 +17,6 @@ const themes = {
 }
 
 const colors = {
-  neutral: {
-    name: 'Neutral',
-    primary: '222.2 47.4% 11.2%',
-    primaryForeground: '210 40% 98%'
-  },
-  slate: {
-    name: 'Slate',
-    primary: '222.2 47.4% 11.2%',
-    primaryForeground: '210 40% 98%'
-  },
-  gray: {
-    name: 'Gray',
-    primary: '220 9% 46%',
-    primaryForeground: '0 0% 98%'
-  },
-  zinc: {
-    name: 'Zinc',
-    primary: '240 5% 34%',
-    primaryForeground: '0 0% 98%'
-  },
-  stone: {
-    name: 'Stone',
-    primary: '25 5% 45%',
-    primaryForeground: '0 0% 98%'
-  },
   red: {
     name: 'Red',
     primary: '0 84% 60%',
@@ -57,19 +32,9 @@ const colors = {
     primary: '38 92% 50%',
     primaryForeground: '0 0% 98%'
   },
-  yellow: {
-    name: 'Yellow',
-    primary: '48 96% 53%',
-    primaryForeground: '0 0% 98%'
-  },
   lime: {
     name: 'Lime',
     primary: '82 76% 36%',
-    primaryForeground: '0 0% 98%'
-  },
-  green: {
-    name: 'Green',
-    primary: '142 76% 36%',
     primaryForeground: '0 0% 98%'
   },
   emerald: {
@@ -92,24 +57,9 @@ const colors = {
     primary: '199 89% 48%',
     primaryForeground: '0 0% 98%'
   },
-  blue: {
-    name: 'Blue',
-    primary: '221 83% 53%',
-    primaryForeground: '0 0% 98%'
-  },
   indigo: {
     name: 'Indigo',
     primary: '238 83% 77%',
-    primaryForeground: '0 0% 98%'
-  },
-  violet: {
-    name: 'Violet',
-    primary: '262 83% 58%',
-    primaryForeground: '0 0% 98%'
-  },
-  purple: {
-    name: 'Purple',
-    primary: '263 70% 50%',
     primaryForeground: '0 0% 98%'
   },
   fuchsia: {
@@ -120,11 +70,6 @@ const colors = {
   pink: {
     name: 'Pink',
     primary: '330 81% 60%',
-    primaryForeground: '0 0% 98%'
-  },
-  rose: {
-    name: 'Rose',
-    primary: '346 77% 49%',
     primaryForeground: '0 0% 98%'
   }
 }

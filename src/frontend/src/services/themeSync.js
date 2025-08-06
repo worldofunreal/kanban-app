@@ -75,11 +75,11 @@ class ThemeSyncService {
         dark_mode: document.documentElement.classList.contains('dark')
       };
 
-      // Import backend canister
-      const { backend } = await import('../../../declarations/backend');
+      // Import canister service
+      const canisterService = await import('./canisterService.js');
       
       // Update theme preferences in backend
-      const result = await backend.update_theme_preferences(themePreferences);
+      const result = await canisterService.default.updateThemePreferences(themePreferences);
       
       if ('Ok' in result) {
         console.log('Theme preferences synced to backend');

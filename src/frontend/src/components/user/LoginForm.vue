@@ -364,8 +364,9 @@ const handleSignIn = async () => {
     
     // Check if user exists in backend
     console.log('Checking if user exists in backend...');
-    const { backend } = await import('../../../../declarations/backend');
-    const isRegistered = await backend.is_user_registered();
+    const canisterService = await import('../../services/canisterService.js');
+    
+    const isRegistered = await canisterService.default.isUserRegistered();
     
     console.log('User registration status:', isRegistered);
     

@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { backend } from 'declarations/backend';
+import canisterService from '../services/canisterService.js';
 
 export const useTeamsStore = defineStore('teams', () => {
   // State
@@ -21,7 +21,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const userTeamsData = await backend.get_user_teams(userId);
+      const userTeamsData = await canisterService.getUserTeams(userId);
       teams.value = userTeamsData;
     } catch (err) {
       error.value = err.message;
@@ -36,7 +36,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const publicTeamsData = await backend.get_public_teams();
+      const publicTeamsData = await canisterService.getPublicTeams();
       teams.value = publicTeamsData;
     } catch (err) {
       error.value = err.message;
@@ -51,7 +51,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const result = await backend.create_team(name, description, isPublic);
+      const result = await canisterService.createTeam(name, description, isPublic);
 
       if ('Ok' in result) {
         // Refresh teams list
@@ -74,7 +74,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const result = await backend.update_team(teamId, updates);
+      const result = await canisterService.updateTeam(teamId, updates);
 
       if ('Ok' in result) {
         // Update local state
@@ -100,7 +100,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const result = await backend.delete_team(teamId);
+      const result = await canisterService.deleteTeam(teamId);
 
       if ('Ok' in result) {
         // Remove from local state
@@ -123,7 +123,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const teamData = await backend.get_team(teamId);
+      const teamData = await canisterService.getTeam(teamId);
       if (teamData) {
         currentTeam.value = teamData;
         return { success: true, team: teamData };
@@ -144,7 +144,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const result = await backend.invite_user(
+      const result = await canisterService.inviteUser(
         { Team: teamId },
         role,
         expiresAt
@@ -169,7 +169,7 @@ export const useTeamsStore = defineStore('teams', () => {
     error.value = null;
 
     try {
-      const result = await backend.remove_member({ Team: teamId }, userId);
+      const result = await canisterService.removeMember({ Team: teamId }, userId);
 
       if ('Ok' in result) {
         // Refresh team data

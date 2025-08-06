@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
-import { backend } from 'declarations/backend';
+import canisterService from '../services/canisterService.js';
 
 export const useProjectsStore = defineStore('projects', () => {
   // State
@@ -26,7 +26,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const userProjectsData = await backend.get_user_projects(userId);
+      const userProjectsData = await canisterService.getUserProjects(userId);
       projects.value = userProjectsData;
     } catch (err) {
       error.value = err.message;
@@ -41,7 +41,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const teamProjectsData = await backend.get_team_projects(teamId);
+      const teamProjectsData = await canisterService.getTeamProjects(teamId);
       projects.value = teamProjectsData;
     } catch (err) {
       error.value = err.message;
@@ -56,7 +56,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.create_project(name, description, owner);
+      const result = await canisterService.createProject(name, description, owner);
 
       if ('Ok' in result) {
         // Refresh projects list
@@ -79,7 +79,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.update_project(projectId, updates);
+      const result = await canisterService.updateProject(projectId, updates);
 
       if ('Ok' in result) {
         // Update local state
@@ -110,7 +110,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.delete_project(projectId);
+      const result = await canisterService.deleteProject(projectId);
 
       if ('Ok' in result) {
         // Remove from local state
@@ -135,7 +135,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const projectData = await backend.get_project(projectId);
+      const projectData = await canisterService.getProject(projectId);
       if (projectData) {
         currentProject.value = projectData;
         return { success: true, project: projectData };
@@ -156,7 +156,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.transfer_ownership(projectId, newOwner);
+      const result = await canisterService.transferOwnership(projectId, newOwner);
 
       if ('Ok' in result) {
         // Refresh project data
@@ -179,7 +179,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.invite_user(
+      const result = await canisterService.inviteUser(
         { Project: projectId },
         role,
         expiresAt
@@ -204,7 +204,7 @@ export const useProjectsStore = defineStore('projects', () => {
     error.value = null;
 
     try {
-      const result = await backend.remove_member(
+      const result = await canisterService.removeMember(
         { Project: projectId },
         userId
       );

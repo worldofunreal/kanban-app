@@ -3,6 +3,8 @@ import { mnemonicToSeedSync, generateMnemonic, validateMnemonic } from 'bip39';
 import { Ed25519KeyIdentity } from '@dfinity/identity';
 import nacl from 'tweetnacl';
 import { useRouter } from 'vue-router';
+import { setCurrentIdentity, clearCurrentIdentity } from '../services/canisterService.js';
+import canisterService from '../services/canisterService.js';
 
 let identity = null;
 
@@ -75,6 +77,9 @@ export const useAuthStore = defineStore('auth', {
 
         console.log('Identity created:', identity.getPrincipal().toText());
 
+        // Set current identity for backend calls
+        setCurrentIdentity(identity);
+
         // Save seed phrase and set authenticated state
         this.seedPhrase = seedPhrase;
         this.authenticated = true;
@@ -131,26 +136,8 @@ export const useAuthStore = defineStore('auth', {
           theme_preferences: []
         };
 
-        // Import backend canister with authenticated identity
-        const { createActor } = await import('../../../declarations/backend');
-        const { HttpAgent } = await import('@dfinity/agent');
-        
-        // Create agent with authenticated identity
-        const agent = new HttpAgent({
-          identity: identity,
-          host: 'http://127.0.0.1:4943'
-        });
-        
-        // Fetch root key for local development
-        await agent.fetchRootKey();
-        
-        // Create actor with authenticated identity
-        const backendActor = createActor(process.env.CANISTER_ID_BACKEND, {
-          agent
-        });
-
         // Create user profile with authenticated call
-        const result = await backendActor.create_user(userProfile);
+        const result = await canisterService.createUser(userProfile);
 
         console.log('Backend result:', result);
 
@@ -177,11 +164,8 @@ export const useAuthStore = defineStore('auth', {
         if (!identity) {
           throw new Error('No identity available');
         }
-        // Import backend canister
-        const { backend } = await import('../../../declarations/backend');
-
         // Get user profile
-        const result = await backend.get_current_user();
+        const result = await canisterService.getCurrentUser();
 
         if (result) {
           this.user = result;
@@ -224,6 +208,9 @@ export const useAuthStore = defineStore('auth', {
 
         console.log('Identity recovered:', identity.getPrincipal().toText());
 
+        // Set current identity for backend calls
+        setCurrentIdentity(identity);
+
         // Set authenticated state
         this.seedPhrase = seedPhrase;
         this.authenticated = true;
@@ -254,8 +241,23 @@ export const useAuthStore = defineStore('auth', {
 
         const principal = identity.getPrincipal().toText();
 
-        // Import backend canister
-        const { backend } = await import('../../../declarations/backend');
+        // Import backend canister with authenticated identity
+        const { createActor } = await import('../../../declarations/backend');
+        const { HttpAgent } = await import('@dfinity/agent');
+        
+        // Create agent with authenticated identity
+        const agent = new HttpAgent({
+          identity: identity,
+          host: 'http://127.0.0.1:4943'
+        });
+        
+        // Fetch root key for local development
+        await agent.fetchRootKey();
+        
+        // Create actor with authenticated identity
+        const backendActor = createActor(process.env.CANISTER_ID_BACKEND, {
+          agent
+        });
 
         // Format updates for UserProfileUpdate type
         const formattedUpdates = {
@@ -267,7 +269,7 @@ export const useAuthStore = defineStore('auth', {
         };
 
         // Update user profile
-        const result = await backend.update_profile(principal, formattedUpdates);
+        const result = await canisterService.updateProfile(principal, formattedUpdates);
 
         if ('Ok' in result) {
           this.user = result.Ok;
@@ -292,11 +294,8 @@ export const useAuthStore = defineStore('auth', {
 
         const principal = identity.getPrincipal().toText();
 
-        // Import backend canister
-        const { backend } = await import('../../../declarations/backend');
-
         // Update username
-        const result = await backend.update_username(principal, username);
+        const result = await canisterService.updateUsername(principal, username);
 
         if ('Ok' in result) {
           // Update local user state
@@ -321,6 +320,9 @@ export const useAuthStore = defineStore('auth', {
         // Clear all state
         this.$reset();
         identity = null;
+
+        // Clear current identity for backend calls
+        clearCurrentIdentity();
 
         // Clear localStorage
         localStorage.removeItem('authStore');
@@ -385,6 +387,9 @@ export const useAuthStore = defineStore('auth', {
             'Identity restored from localStorage:',
             identity.getPrincipal().toText()
           );
+          
+          // Set current identity for backend calls
+          setCurrentIdentity(identity);
         }
 
         console.log('Auth state loaded from localStorage');
@@ -415,6 +420,9 @@ export const useAuthStore = defineStore('auth', {
         const keyPair = deriveKeysFromSeedPhrase(seedPhrase);
         identity = createIdentityFromKeyPair(keyPair);
 
+        // Set current identity for backend calls
+        setCurrentIdentity(identity);
+
         // Set authenticated state
         this.seedPhrase = seedPhrase;
         this.authenticated = true;
@@ -423,11 +431,8 @@ export const useAuthStore = defineStore('auth', {
         // Save to localStorage
         this.saveStateToLocalStorage();
 
-        // Import backend canister
-        const { backend } = await import('../../../declarations/backend');
-
         // Create user profile with provided data
-        const result = await backend.create_user({
+        const result = await canisterService.createUser({
           name: profile.name,
           username: profile.username || (() => {
             const randomDigits = Math.floor(Math.random() * 9000) + 1000; // 1000-9999
@@ -441,7 +446,7 @@ export const useAuthStore = defineStore('auth', {
 
         if ('Ok' in result) {
           // Get the created user
-          const userResult = await backend.get_user(result.Ok);
+          const userResult = await canisterService.getUser(result.Ok);
           if ('Ok' in userResult && userResult.Ok) {
             this.user = userResult.Ok;
             this.registered = true;
